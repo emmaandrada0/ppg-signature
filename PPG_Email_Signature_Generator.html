@@ -795,23 +795,33 @@
 
   // ── COPY SIGNATURE ───────────────────────────────────────────────────────────
   async function copySignature() {
-    const sig = document.getElementById('sig-preview');
-
-    // Use ClipboardItem for rich HTML copy
-    try {
-      const html = sig.outerHTML;
-      const blob = new Blob([html], { type: 'text/html' });
-      const item = new ClipboardItem({ 'text/html': blob });
-      await navigator.clipboard.write([item]);
-    } catch(e) {
-      // Fallback: select and copy
-      const range = document.createRange();
-      range.selectNode(sig);
-      window.getSelection().removeAllRanges();
-      window.getSelection().addRange(range);
-      document.execCommand('copy');
-      window.getSelection().removeAllRanges();
-    }
+  const sig = document.getElementById('sig-preview');
+  const html = sig.innerHTML;
+  try {
+    const blob = new Blob([html], {type: 'text/html'});
+    const plain = new Blob([sig.innerText], {type: 'text/plain'});
+    await navigator.clipboard.write([new ClipboardItem({'text/html': blob, 'text/plain': plain})]);
+    showSuccess(); return;
+  } catch(e) {}
+  try {
+    const d = document.createElement('div');
+    d.contentEditable = 'true';
+    d.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0.01;overflow:hidden;';
+    d.innerHTML = html;
+    document.body.appendChild(d);
+    d.focus();
+    const r = document.createRange();
+    r.selectNodeContents(d);
+    const s = window.getSelection();
+    s.removeAllRanges();
+    s.addRange(r);
+    document.execCommand('copy');
+    s.removeAllRanges();
+    document.body.removeChild(d);
+    showSuccess();
+  } catch(e) {
+    alert('Please right-click the signature, select all, copy, then paste into your email client.');
+  }
 
     const btn = document.getElementById('btn-copy');
     btn.classList.add('copied');
