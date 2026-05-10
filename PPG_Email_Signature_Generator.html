@@ -796,7 +796,7 @@
   // ── COPY SIGNATURE ───────────────────────────────────────────────────────────
   async function copySignature() {
   const sig = document.getElementById('sig-preview');
-  const html = sig.innerHTML;
+const html = sig.querySelector('table') ? sig.querySelector('table').outerHTML : sig.innerHTML;
   try {
     const blob = new Blob([html], {type: 'text/html'});
     const plain = new Blob([sig.innerText], {type: 'text/plain'});
